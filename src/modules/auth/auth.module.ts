@@ -17,6 +17,7 @@ import { Bartender } from '../bartenders/entities/bartender.entity';
    TypeOrmModule.forFeature([Bartender])
   ],
   controllers:[AuthController],
-  providers: [AuthService,BartendersService]
+  providers: [AuthService,BartendersService],
+  exports: [ AuthService ]
 })
 export class AuthModule{}
