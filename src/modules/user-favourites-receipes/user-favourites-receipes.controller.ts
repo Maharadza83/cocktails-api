@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Headers, Param, Post, UseGuards} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, Param, Post, UseGuards } from '@nestjs/common';
 import {UserFavouritesReceipesService} from "./user-favourites-receipes.service";
 import {ReceipeDto} from "../receipes/dto/receipe.dto";
 import {AuthGuard} from "../auth/guards/auth.guard";
@@ -22,5 +22,14 @@ export class UserFavouritesReceipesController {
     console.log(token)
 
     return this.userFavouritesReceipesService.removeFromUserFav(params.id, token)
+
   }
-}
+
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  public checkIfIsFav(@Param() params: { id: string }, @Headers('bearer') token: string): Promise<any> {
+      return this.userFavouritesReceipesService.checkIfIsFavourite(params.id, token)
+  }
+
+
+  }

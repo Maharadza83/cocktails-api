@@ -18,13 +18,16 @@ export class UserFavouritesReceipesService {
   }
 
   public async addToUserFav(dto: ReceipeDto, token: string): Promise<any> {
+    const bartenderId: string = await this.authService.getSelfId(token);
     const doesDrinkExist: boolean = !!await this.receipesService.getDrink(dto.idDrink)
+    const isAlreadyFav: boolean = !!await this.userFavouritesReceipesRepository.findOneBy({ bartenderId, receipeId: dto.idDrink })
+
+    if (isAlreadyFav) return this.userFavouritesReceipesRepository.findOneBy({ bartenderId, receipeId: dto.idDrink })
 
     if (!doesDrinkExist) {
       await this.receipesService.create(dto)
     }
 
-    const bartenderId: string = await this.authService.getSelfId(token);
 
     if (bartenderId) {
       const relationDto = { id: ulid(), bartenderId, receipeId: dto.idDrink }
@@ -34,13 +37,20 @@ export class UserFavouritesReceipesService {
 
     throw UnauthorizedException
   }
-
-  public async removeFromUserFav(relationId: string, token: string) {
+  public async checkIfIsFavourite(receipeId: string, token: string) {
     const bartenderId: string = await this.authService.getSelfId(token);
-    const fav = await this.userFavouritesReceipesRepository.findOneBy({ id: relationId })
+
+    const isFav = await this.userFavouritesReceipesRepository.findOne({ where: { receipeId, bartenderId } })
+
+    return { isFav: !!isFav }
+  }
+
+  public async removeFromUserFav(receipeId: string, token: string) {
+    const bartenderId: string = await this.authService.getSelfId(token);
+    const fav = await this.userFavouritesReceipesRepository.findOneBy({ receipeId, bartenderId })
 
     if (bartenderId === fav.bartenderId) {
-      return this.userFavouritesReceipesRepository.delete({ id: relationId })
+      return this.userFavouritesReceipesRepository.delete({ receipeId, bartenderId  })
     }
 
     throw ForbiddenException

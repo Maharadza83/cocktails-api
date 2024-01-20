@@ -41,10 +41,10 @@ export class BartendersService {
   public async findOne(username: string): Promise<any> {
     return this.bartendersRepository.findOneBy({username});
     }
-
   public async getFav(id: string): Promise<any> {
-    return  this.bartendersRepository.find({ where: { id }, relations: ['favRecipes', 'favRecipes.receipe'] });
+    const data =  await this.bartendersRepository.findOne({ where: { id }, relations: ['favRecipes', 'favRecipes.receipe'] });
 
-    
+    return data.favRecipes.map(el => el.receipe)
   }
+
 }
